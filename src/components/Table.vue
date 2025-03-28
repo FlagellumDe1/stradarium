@@ -5,29 +5,35 @@
   import { ref } from "vue";
   import type { TPost } from "../types/TPost.ts";
   import { useToast } from "primevue";
+  import InputText from 'primevue/inputtext';
+
 
   const posts = ref<TPost[]>([]);
   const toast = useToast();
-  axios.get("https://jsonplaceholder.typicode.com/posts")
-    .then((response) => {
-      posts.value = response.data;
+  const inputText = ref<string>('');
+  function getData(): void {
+    axios.get("https://jsonplaceholder.typicode.com/posts", inputText.value ? {
+      params: {
+        title: inputText.value,
+      }
+    } : {})
+      .then((response) => {
+        posts.value = response.data;
+      })
+    .catch(() => {
       toast.add({
-        severity: "success",
-        summary: 'Данные успешно загружены',
+        severity: "error",
+        summary: 'Произошла ошибка',
+        detail: 'Попробуйте позже',
         life: 3000,
       })
     })
-  .catch(() => {
-    toast.add({
-      severity: "error",
-      summary: 'Произошла ошибка',
-      detail: 'Попробуйте позже',
-      life: 3000,
-    })
-  })
+  }
+  getData();
 </script>
 
 <template>
+  <InputText type="text" v-model="inputText" @update:model-value="getData"></InputText>
   <DataTable :loading="!posts.length" :value="posts"  paginator :rows="25" show-gridlines>
     <Column field="userId" header="Пользователь" :sortable="true"></Column>
     <Column field="id" header="ID поста" :sortable="true"></Column>
