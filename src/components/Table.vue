@@ -11,7 +11,9 @@
   const posts = ref<TPost[]>([]);
   const toast = useToast();
   const inputText = ref<string>('');
+  const isLoading = ref<boolean>(false);
   function getData(): void {
+    isLoading.value = true;
     axios.get("https://jsonplaceholder.typicode.com/posts", inputText.value ? {
       params: {
         title: inputText.value,
@@ -20,21 +22,24 @@
       .then((response) => {
         posts.value = response.data;
       })
-    .catch(() => {
-      toast.add({
-        severity: "error",
-        summary: 'Произошла ошибка',
-        detail: 'Попробуйте позже',
-        life: 3000,
+      .catch(() => {
+        toast.add({
+          severity: "error",
+          summary: 'Произошла ошибка',
+          detail: 'Попробуйте позже',
+          life: 3000,
+        })
       })
-    })
+      .finally(() => {
+        isLoading.value = false;
+      });
   }
   getData();
 </script>
 
 <template>
   <InputText type="text" v-model="inputText" @update:model-value="getData"></InputText>
-  <DataTable :loading="!posts.length" :value="posts"  paginator :rows="25" show-gridlines>
+  <DataTable :loading="isLoading" :value="posts"  paginator :rows="25" show-gridlines>
     <Column field="userId" header="Пользователь" :sortable="true"></Column>
     <Column field="id" header="ID поста" :sortable="true"></Column>
     <Column field="title" header="Заголовок"></Column>
