@@ -4,28 +4,34 @@
   import Column from 'primevue/column';
   import { ref } from "vue";
   import type { TPost } from "../types/TPost.ts";
+  import { useToast } from "primevue";
 
-  const posts = ref<TPost[] | null>(null);
+  const posts = ref<TPost[]>([]);
+  const toast = useToast();
   axios.get("https://jsonplaceholder.typicode.com/posts")
     .then((response) => {
       posts.value = response.data;
+      toast.add({
+        severity: "success",
+        summary: 'Данные успешно загружены',
+        life: 3000,
+      })
     })
-  .catch((error) => {
-    console.error(error);
+  .catch(() => {
+    toast.add({
+      severity: "error",
+      summary: 'Произошла ошибка',
+      detail: 'Попробуйте позже',
+      life: 3000,
+    })
   })
 </script>
+
 <template>
-  <template v-if="!posts">
-    Подождите, идет загрузка
-  </template>
-  <template v-else-if="posts?.length === 0" >
-    Посты не найдены
-  </template>
-  <DataTable :value="posts"  paginator :rows="5" show-gridlines v-else>
-    <Column field="userId" header="Code"></Column>
-    <Column field="id" header="Name"></Column>
-    <Column field="title" header="Category"></Column>
-    <Column field="body" header="Quantity"></Column>
+  <DataTable :loading="!posts.length" :value="posts"  paginator :rows="25" show-gridlines>
+    <Column field="userId" header="Пользователь" :sortable="true"></Column>
+    <Column field="id" header="ID поста" :sortable="true"></Column>
+    <Column field="title" header="Заголовок"></Column>
+    <Column field="body" header="Текст"></Column>
   </DataTable>
 </template>
-<style></style>

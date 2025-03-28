@@ -1,16 +1,11 @@
 <script setup lang="ts">
+  import { Toast } from "primevue";
 </script>
 
 <template>
-  <div class="container">
-
-  </div>
   <router-view></router-view>
+  <toast></toast>
 </template>
 
 <style scoped>
-  .container {
-    max-width: 1440px;
-    margin-inline: auto;
-  }
 </style>
