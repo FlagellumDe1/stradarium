@@ -7,28 +7,36 @@
   import { useToast } from "primevue";
   import InputText from 'primevue/inputtext';
 
-
   const posts = ref<TPost[]>([]);
   const toast = useToast();
   const inputText = ref<string>('');
   const isLoading = ref<boolean>(false);
+  const controller = ref<AbortController | null>(null);
+
   function getData(): void {
+    if (controller.value) {
+      controller.value.abort();
+    }
+    controller.value = new AbortController();
     isLoading.value = true;
-    axios.get("https://jsonplaceholder.typicode.com/posts", inputText.value ? {
+    axios.get("https://jsonplaceholder.typicode.com/posts", {
       params: {
-        title: inputText.value,
-      }
-    } : {})
+        title: inputText.value ? inputText.value : undefined,
+      },
+      signal: controller.value.signal,
+    })
       .then((response) => {
         posts.value = response.data;
       })
-      .catch(() => {
-        toast.add({
-          severity: "error",
-          summary: 'Произошла ошибка',
-          detail: 'Попробуйте позже',
-          life: 3000,
-        })
+      .catch((error) => {
+        if (!axios.isCancel(error)) {
+          toast.add({
+            severity: "error",
+            summary: 'Произошла ошибка',
+            detail: error,
+            life: 9000,
+          })
+        }
       })
       .finally(() => {
         isLoading.value = false;
