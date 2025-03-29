@@ -32,9 +32,9 @@
         if (!axios.isCancel(error)) {
           toast.add({
             severity: "error",
-            summary: 'Произошла ошибка',
-            detail: error,
-            life: 9000,
+            summary: "Произошла ошибка",
+            detail: "Попробуйте позже",
+            life: 3000,
           })
         }
       })
